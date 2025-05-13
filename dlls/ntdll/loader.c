@@ -4331,7 +4331,7 @@ static void load_arm64ec_module(void)
     ULONG buffer[16];
     KEY_VALUE_PARTIAL_INFORMATION *info = (KEY_VALUE_PARTIAL_INFORMATION *)buffer;
     UNICODE_STRING nameW = RTL_CONSTANT_STRING( L"\\Registry\\Machine\\Software\\Microsoft\\Wow64\\amd64" );
-    WCHAR module[64] = L"C:\\windows\\system32\\xtajit64.dll";
+    WCHAR module[64] = L"C:\\windows\\system32\\libarm64ecfex.dll";
     OBJECT_ATTRIBUTES attr;
     WINE_MODREF *wm;
     NTSTATUS status;
@@ -4381,6 +4381,7 @@ static void build_wow64_main_module(void)
 static void (WINAPI *pWow64LdrpInitialize)( CONTEXT *ctx );
 
 void (WINAPI *pWow64PrepareForException)( EXCEPTION_RECORD *rec, CONTEXT *context ) = NULL;
+NTSTATUS (WINAPI *pWow64SuspendLocalThread)( HANDLE thread, ULONG *count ) = NULL;
 
 static void init_wow64( CONTEXT *context )
 {
@@ -4405,6 +4406,7 @@ static void init_wow64( CONTEXT *context )
 
         GET_PTR( Wow64LdrpInitialize );
         GET_PTR( Wow64PrepareForException );
+        GET_PTR( Wow64SuspendLocalThread );
 #undef GET_PTR
         imports_fixup_done = TRUE;
     }
@@ -4412,7 +4414,6 @@ static void init_wow64( CONTEXT *context )
     RtlLeaveCriticalSection( &loader_section );
     pWow64LdrpInitialize( context );
 }
-
 
 #else
 
